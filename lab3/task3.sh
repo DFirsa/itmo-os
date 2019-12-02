@@ -1,3 +1,4 @@
 #!/bin/bash
 
-ps -eo pid,cmd | grep "/sbin/" | awk '{print $1}'
+ps -eo pid,cmd | grep "[[:digit:]] /sbin/"
+# | awk '{print $1}'
