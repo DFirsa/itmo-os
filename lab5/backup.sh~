@@ -29,13 +29,9 @@ then
 		newFileName=$(echo $sourceFile | sed "s/source/${newDir}/")
 		cp $sourceFile $newFileName
 	done
-	echo "- $newDir created at $now" >> $backupReport
-	echo "Files:" >> $backupReport
+	echo "- $newDir created at $now . Files:" >> $backupReport
 	ls /home/nekosmonavt/$newDir >> $backupReport
 else
-	touch modify.tmp
-	touch new.tmp
-
 	for sourceFile in $sourcePath*;
 	do
 		sourceFName=$(echo $surceFile | sed "s/${sourcePath}//")
@@ -44,27 +40,10 @@ else
 			currentFileName=$(echo $alreadyBackupedFile | sed "s/${dir}//")
 			if [[ $currentFileName == $sourceFName ]];
 			then
-				cmp -s $sourceFile $alreadyBackupedFile ||
-					{
-						newNameOfOldFile=$(echo "$currentFileName\.$now")
-						mv $alreadyBackupedFile $dir$newNameOfOldFile
-						cp $sourceFile $alreadyBackupedFile
-						echo "$alreadyBackupedFile $dir$newNameOfOldFile" | sed 's/ /->/' >> modify.tmp
-						echo "$sourceFile $alreadyBackupedFile" | sed 's/ /->/' >> new.tmp
-					} 
+				if cmp -s $sourceFile $alreadyBackupedFile ; then
+					
 			else
-				cp $sourceFile $alreadyBackupedFile
-				echo "$sourceFile $alreadyBackupedFile" | sed 's/ /->' >> new.tmp
 			fi
 		done
 	done
-	
-	echo "- $dir was changed at $now" >> $backupReport
-	echo "Modified files:" >> $backupReport
-	cat modify.tmp >> $backupReport
-	echo "New files:" >> $backupReport
-	cat new.tmp >> $backupReport
-
-	rm modify.tmp
-	rm new.tmp
 fi
