@@ -36,6 +36,8 @@ else
 	touch modify.tmp
 	touch new.tmp
 
+	#NEED TO FIX THIS 
+
 	for sourceFile in $sourcePath*;
 	do
 		sourceFName=$(echo $surceFile | sed "s/${sourcePath}//")
