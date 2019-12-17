@@ -24,10 +24,11 @@ if [[ $haveRecentBackup -eq "0" ]];
 then
 	newDir="Backup-$now"
 	mkdir /home/nekosmonavt/$newDir
-	for sourceFile in $sourcePath*;
+	for sourceFile in $(ls -p $sourcePath | grep -hv "/");
 	do
-		newFileName=$(echo $sourceFile | sed "s/source/${newDir}/")
-		cp $sourceFile $newFileName
+		newFileName=$(echo "/home/nekosmonavt/$newDir")
+		backupedFile=$(echo "$sourcePath$sourceFile")
+		cp $backupedFile $newFileName
 	done
 	echo "- $newDir created at $now" >> $backupReport
 	echo "Files:" >> $backupReport
@@ -38,27 +39,29 @@ else
 
 	#NEED TO FIX THIS 
 
-	for sourceFile in $sourcePath*;
+	for sourceFile in $(ls -p $sourcePath | grep -hv "/");
 	do
-		sourceFName=$(echo $surceFile | sed "s/${sourcePath}//")
-		for alreadyBackupedFile in $dir*;
-		do
-			currentFileName=$(echo $alreadyBackupedFile | sed "s/${dir}//")
-			if [[ $currentFileName == $sourceFName ]];
-			then
-				cmp -s $sourceFile $alreadyBackupedFile ||
-					{
-						newNameOfOldFile=$(echo "$currentFileName\.$now")
-						mv $alreadyBackupedFile $dir$newNameOfOldFile
-						cp $sourceFile $alreadyBackupedFile
-						echo "$alreadyBackupedFile $dir$newNameOfOldFile" | sed 's/ /->/' >> modify.tmp
-						echo "$sourceFile $alreadyBackupedFile" | sed 's/ /->/' >> new.tmp
-					} 
-			else
-				cp $sourceFile $alreadyBackupedFile
-				echo "$sourceFile $alreadyBackupedFile" | sed 's/ /->' >> new.tmp
-			fi
-		done
+		isNotNewFile=$(ls /home/nekosmonavt/$dir/ | grep -h "${sourceFile}" | wc -l)
+		sourceWithPath=$(echo "$sourcePath$sourceFile")	
+			
+		if [[ $isNotNewFile -eq "0" ]];
+		then
+			newFile=$(echo $sourceWithPath | sed "s/\/source\//\/${dir}\//")
+			cp $sourceWithPath $newFile
+			echo $sourceFile >> new.tmp
+		else
+			alreadyBackupped=$(echo "/home/nekosmonavt/$dir/$sourceFile")
+			cmp -s $sourceWithPath $alreadyBackupped ||
+				{
+					newName=$(echo "$alreadyBackupped.$now")
+					mv $alreadyBackupped $newName
+					path=$(echo "/home/nekosmonavt/$dir")
+					cp $sourceWithPath $path
+					echo "$sourceFile (new version)" >> modify.tmp
+					echo "$alreadyBackupped -> $newName" | sed "s/\/home\/nekosmonavt\/${dir}\///g" >> modify.tmp
+				}
+		fi
+		
 	done
 	
 	echo "- $dir was changed at $now" >> $backupReport
