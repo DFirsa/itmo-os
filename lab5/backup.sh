@@ -35,9 +35,7 @@ then
 	ls /home/nekosmonavt/$newDir >> $backupReport
 else
 	touch modify.tmp
-	touch new.tmp
-
-	#NEED TO FIX THIS 
+	touch new.tmp 
 
 	for sourceFile in $(ls -p $sourcePath | grep -hv "/");
 	do
